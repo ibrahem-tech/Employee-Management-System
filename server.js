@@ -518,3 +518,56 @@ const getAndRenderByM = inquirerRes => {
             });
     });
 }
+
+const deleteDepartment = () => {
+    connection.query("SELECT * FROM department", function (err, resultD) {
+        if (err) throw err;
+        inquirer.prompt(
+             {
+                    type: "list",
+                    name: "chooseDepartment",
+                    message: "Which department would you like to delete?",
+                    choices: function () {
+                        var choiceArray = [];
+                        for (var i = 0; i < resultD.length; i++) {
+                            choiceArray.push(resultD[i].department_name);
+                        }
+                        return choiceArray;
+                    },
+                }
+            ).then(res => {
+                connection.query("DELETE FROM department WHERE department_name = ?", [res.chooseDepartment], (err, res) => {
+                    if (err) throw err;
+                    console.log("Deleted!!");
+                    startF();
+                });
+            });
+    });
+}
+
+const deleteRole = () => {
+    connection.query("SELECT * FROM role", function (err, resultR) {
+        if (err) throw err;
+        inquirer.prompt(
+                {
+                    type: "list",
+                    name: "chooseRole",
+                    message: "What is the employee's role?",
+                    choices: function () {
+                        var choiceRole = [];
+                        for (var i = 0; i < resultR.length; i++) {
+                            choiceRole.push(resultR[i].title);
+                        }
+                        return choiceRole;
+                    },
+                })
+            .then(res => {
+                connection.query(
+                    "DELETE FROM role WHERE title = ?", [res.chooseRole], function (err, res) {
+                        if (err) throw err;
+                        console.log('Deleted!!');
+                        startF();
+                    });
+            });
+    });
+}
