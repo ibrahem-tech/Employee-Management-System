@@ -17,90 +17,94 @@ connection.connect(function(err){
 });
 
 const startF = () => {
-    inquirer.prompt({
-        type: "rawlist",
-        choises: [
-            "Add department",
-            "Add Role",
-            "Add Employee",
-            "View Departments",
-            "view roles",
-            "view Employees",
-            "Update employee manager",
-            "Update Employee Role",
-            "View Employees By Department",
-            "View Employees By Manager",
-            "Delete department",
-            "Delete Role",
-            "Delete Employee",
-            "View the total utilized budget of a department",
-            "Exit",
-        ]
-    }).then(function(res){
-        switch(res.options){
-            case "Add department":
-                addDepartment();
-                break;
-                
+    // prompt for things that user can do 
+    inquirer
+        .prompt({
+            type: "rawlist",
+            message: "Hello! What would you like to do?",
+            name: "options",
+            choices: [
+                "View Employees",
+                "View Employees By Department",
+                "View Employees By Manager",
+                "Add Employee",
+                "Delete Employee",
+                "Update Employee Role",
+                "Update Employee Manager",
+                "View Roles",
+                "Add Role",
+                "Delete Role",
+                "View Departments",
+                "Add Department",
+                "Delete Department",
+                "View Utilized Budget of Departments",
+                "End"
+            ]
+        })
+        .then(function (res) {
+           
+            switch (res.options) {
+                case "View All Employees":
+                    viewAll("employee");
+                    break;
+
+                case "View Employees By Department":
+                    viewByDepartment();
+                    break;
+
+                case "View Employees By Manager":
+                    viewByManager();
+                    break;
+
+                case "Add Employee":
+                    addEmployee();
+                    break;
+
+                case "Delete Employee":
+                    deleteEmployee();
+                    break;
+
+                case "Update Employee Role":
+                    updateEmployeeRole();
+                    break;
+
+                case "Update Employee Manager":
+                    updateEmployeeManager();
+                    break;
+
+                case "View All Roles":
+                    viewAll("role");
+                    break;
+
                 case "Add Role":
                     addRole();
                     break;
 
-                    case "Add Employee":
-                    addEmployee();
+                case "Delete Role":
+                    deleteRole();
                     break;
 
-                    case "View Departments":
-                        viewAll("department");
+                case "View All Departments":
+                    viewAll("department");
                     break;
 
-                    case "view roles":
-                        viewAll("role");
-                    break;
-                    
-                    case "view Employees":
-                        viewAll("employee");
+                case "Add Department":
+                    addDepartment();
                     break;
 
-                    case  "Update employee manager":
-                        updateEmployeeManager();
+                case "Delete Department":
+                    deleteDepartment();
                     break;
 
-                    case "Update Employee Role":
-                        updateEmployeeRole();
+                case "View Utilized Budget of Departments":
+                    utilizedBudget();
                     break;
 
-                    case "View Employees By Department":
-                        viewByDepartment();
-                        break;
-
-                case  "View Employees By Manager":
-                    viewByManager();
+                default:
+                    connection.end();
                     break;
-
-                    case  "Delete department":
-                        deleteDepartment();
-                    break;
-
-                    case "Delete Role":
-                        deleteRole();
-                    break;
-
-                    case "Delete Employee":
-                        deleteEmployee();
-                        break;
-
-                    case  "View the total utilized budget of a department":
-                        utilizedBudget();
-                        break;
-
-                        default:
-                            connection.end();
-                            break;
-                       
-    
-        }
-    });
+            }
+        });
 };
 
 const addDepartment = () => {
@@ -255,35 +259,37 @@ const addEmployee = () => {
 };
 
 const viewAll = tableName => {
-    var qurey;
-    switch (tableName){
-        case "department":
-            connection.query("SELECT * FROM department", (err, res) => {
+    var query;
+    switch (tableName) {
+        case "employee":
+          
+            query = "SELECT employee.id, employee.first_name, employee.last_name,employee.manager_id, department.department_name, role.title, role.salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id"
+            connection.query(query, (err, res) => {
                 if (err) throw err;
                 console.table(res);
-                startF();
+             startF();
             });
             break;
 
             case "role":
+                
                 query = "SELECT role.id,role.title, department.department_name FROM role JOIN department ON role.department_id = department.id ORDER BY role.id"
-            connection.query(query, (err, res) => {
-                if (err) throw err;
-                console.table(res);
-               startF();
-            });
-            break;
-
-                case "employee":
-                    query = "SELECT employee.id, employee.first_name, employee.last_name,employee.manager_id, department.department_name, role.title, role.salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id"
-                    connection.query(query, (err, res) => {
-                        if (err) throw err;
-                        console.table(res);
-                        startF();
-                    });
-                    break;
-    }
-};
+                connection.query(query, (err, res) => {
+                    if (err) throw err;
+                    console.table(res);
+                });
+                break;
+    
+            case "department":
+               
+                connection.query("SELECT * FROM department", (err, res) => {
+                    if (err) throw err;
+                    console.table(res);
+                    startF();
+                });
+                break;
+        }
+    };
 
 const updateEmployeeManager = () => {
     connection.query("SELECT * FROM employee WHERE manager_or_not = 1", function (err, resultM){
