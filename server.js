@@ -13,7 +13,7 @@ let connection = mysql.createConnection({
 connection.connect(function(err){
     if (err) throw err;
     console.log("connected as id:" + connection.threadId)
-    startF()
+    startF();
 });
 
 const startF = () => {
@@ -108,7 +108,7 @@ const addDepartment = () => {
         name: "departmentName",
         message: "Please enter department name"
     }).then(res => {
-        connection.query{
+        connection.query(
             "INSERT INTO department SET ?",{
                 department_name: res.departmentName
             },
@@ -117,7 +117,7 @@ const addDepartment = () => {
                 console.log("Added!");
                 startF();
             }
-        };
+        );
 
     });
 }
@@ -571,3 +571,72 @@ const deleteRole = () => {
             });
     });
 }
+
+const deleteEmployee = () => {
+    connection.query("SELECT * FROM employee", function (err, resultE) {
+        if (err) throw err;
+        inquirer.prompt(
+                {
+                    type: "list",
+                    name: "chooseEmployee",
+                    message: "Which empolyee would you like to choose?",
+                    choices: function () {
+                        var choiceArray = [];
+                        for (var i = 0; i < resultE.length; i++) {
+                            choiceArray.push(resultE[i].first_name + " " + resultE[i].last_name);
+                        }
+                        return choiceArray;
+                    },
+                })
+            .then(res => {
+                let nameArr = res.chooseEmployee.split(" ");
+                let chosenE;
+                for (var i = 0; i < resultE.length; i++) {
+                    if (resultE[i].first_name === nameArr[0]) {
+                        chosenE = resultE[i];
+                    }
+                };
+                connection.query(
+                    "DELETE FROM employee WHERE id =? ", [chosenE.id], function (err, res) {
+                        if (err) throw err;
+                        console.log('Deleted!!');
+                        startF();
+                    });
+            });
+    });
+}
+
+const utilizedBudget = () => {
+    connection.query("SELECT * FROM department", function (err, resultD) {
+        if (err) throw err;
+        inquirer.prompt({
+                type: "list",
+                name: "chooseDepartment",
+                message: "Which department would you like to view?",
+                choices: function () {
+                    var choiceArray = [];
+                    for (var i = 0; i < resultD.length; i++) {
+                        choiceArray.push(resultD[i].department_name);
+                    }
+                    return choiceArray;
+                },
+            })
+            .then(res => {
+                var chosenD;
+                for (var i = 0; i < resultD.length; i++) {
+                    if (resultD[i].department_name === res.chooseDepartment) {
+                        chosenD = resultD[i];
+                    }
+                };
+                connection.query(
+                    "SELECT SUM(salary) FROM role WHERE department_id = ?",
+                    [chosenD.id], function (err, res) {
+                        if (err) throw err;
+                        console.log(`The total utilized budget of ${chosenD.department_name} department: $${res[0]['SUM(salary)']}`);
+                startF();
+                    }
+                );
+
+            });
+    });
+};
