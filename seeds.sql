@@ -19,14 +19,12 @@ FOREIGN KEY (department_id) REFERENCES department(id)
 );
 
 CREATE TABLE employee(
-id INT AUTO_INCREMENT NOT NULL,
-first_name VARCHAR(30) NOT NULL,
-last_name VARCHAR(30) NOT NULL,
-role_id INT,
-manager_or_not BOOLEAN DEFAULT false,
-manager_id INT NULL,
-PRIMARY KEY (id),
-FOREIGN KEY (role_id) REFERENCES role(id)
+ id int,
+    first_name varchar(30),
+    last_name varchar(30),
+    role_id int,
+    manager_id int DEFAULT NULL, 
+    PRIMARY KEY (id)
 )
 
 SELECT * FROM department;

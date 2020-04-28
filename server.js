@@ -481,10 +481,11 @@ const getAndRenderByD = inquirerRes => {
     });
 };
 
-const viewByManager = () => {
+const viewByManager =() => {
     connection.query("SELECT * FROM employee WHERE manager_or_not = 1", function (err, resultM) {
         if (err) throw err;
-        inquirer.prompt(
+        inquirer
+            .prompt(
                 {
                     type: "list",
                     name: "chooseManager",
@@ -497,16 +498,17 @@ const viewByManager = () => {
                         return choiceManager;
                     },
                 },
-            ).then(res => {
-                getAndRenderByM(res);
+            )
+            .then(res => {
+                getAndRenderByManager(res);
             });
     });
 };
 
-const getAndRenderByM = inquirerRes => {
+const getAndRenderByManager = inquirerRes => {
     connection.query("SELECT * FROM employee WHERE manager_or_not = 1", function (err, resultM) {
         if (err) throw err;
-        
+
         let nameM = inquirerRes.chooseManager.split(" ");
         let chosenM;
         for (var i = 0; i < resultM.length; i++) {
@@ -514,7 +516,6 @@ const getAndRenderByM = inquirerRes => {
                 chosenM = resultM[i];
             }
         };
-        
         connection.query(
             "SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id WHERE manager_id = ?",
             [chosenM.id], function (err, res) {
